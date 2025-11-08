@@ -26,6 +26,26 @@ app.use('/images', express.static(path.join(__dirname, 'images')));
 // Use custom static file middleware for additional functionality
 app.use(staticFileMiddleware);
 
+// Routes
+app.use('/api/lessons', lessonRoutes);
+app.use('/api/orders', orderRoutes);
+app.use('/api/search', searchRoutes);
+
+// Root route
+app.get('/', (req, res) => {
+    res.json({ 
+        message: 'Course Booking API is running!',
+        endpoints: {
+            lessons: 'GET /api/lessons',
+            orders: 'POST /api/orders',
+            search: 'GET /api/search?q=query',
+            update_lesson: 'PUT /api/lessons/:id',
+            images: 'GET /images/filename.jpg'
+        },
+        timestamp: new Date().toISOString()
+    });
+});
+
 // Health check route
 app.get('/health', (req, res) => {
     res.json({ 
