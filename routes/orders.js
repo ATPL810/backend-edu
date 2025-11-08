@@ -1,4 +1,5 @@
 const express = require('express');
+const { ObjectId } = require('mongodb');
 const router = express.Router();
 const { getDatabase } = require('../config/database');
 
@@ -6,25 +7,32 @@ const { getDatabase } = require('../config/database');
 router.post('/', async (req, res) => {
     try {
         const db = getDatabase();
-        const { MongoClient } = require('mongodb');
-        
-        // Validate required fields
         const { name, phone, lessons, email } = req.body;
         
         if (!name || !phone || !lessons || !Array.isArray(lessons)) {
-            return res.status(400).json({ error: 'Name, phone, and lessons array are required' });
+            return res.status(400).json({ 
+                error: 'Name, phone, and lessons array are required' 
+            });
         }
         
-        // Validate name (letters only)
         const nameRegex = /^[A-Za-z\s]+$/;
-        if (!nameRegex.test(name)) {
-            return res.status(400).json({ error: 'Name must contain only letters' });
+        if (!nameRegex.test(name.trim())) {
+            return res.status(400).json({ error: 'Name must contain only letters and spaces' });
         }
         
-        // Validate phone (numbers only)
-        const phoneRegex = /^\d+$/;
-        if (!phoneRegex.test(phone)) {
-            return res.status(400).json({ error: 'Phone must contain only numbers' });
+        const phoneRegex = /^\d{10,}$/;
+        if (!phoneRegex.test(phone.trim())) {
+            return res.status(400).json({ error: 'Phone must contain only numbers (min 10 digits)' });
+        }
+        
+        if (lessons.length === 0) {
+            return res.status(400).json({ error: 'Lessons array cannot be empty' });
+        }
+        
+        for (const lesson of lessons) {
+            if (!lesson.lessonId || !ObjectId.isValid(lesson.lessonId)) {
+                return res.status(400).json({ error: 'Invalid lesson ID in lessons array' });
+            }
         }
         
         const newOrder = {
@@ -32,31 +40,33 @@ router.post('/', async (req, res) => {
             phone: phone.trim(),
             email: email ? email.trim() : '',
             lessons: lessons.map(lesson => ({
-                lessonId: new MongoClient.ObjectId(lesson.lessonId),
+                lessonId: new ObjectId(lesson.lessonId),
                 subject: lesson.subject,
                 price: lesson.price,
+                image: lesson.image, // Store image for cart display
                 quantity: lesson.quantity || 1
             })),
-            total: req.body.total || lessons.reduce((sum, lesson) => sum + lesson.price, 0),
+            total: req.body.total || lessons.reduce((sum, lesson) => sum + (lesson.price * (lesson.quantity || 1)), 0),
             orderDate: new Date(),
             status: 'confirmed'
         };
         
-        // Insert order
         const result = await db.collection('orders').insertOne(newOrder);
         
         // Update lesson spaces
-        for (const item of newOrder.lessons) {
-            await db.collection('lessons').updateOne(
+        const updatePromises = newOrder.lessons.map(item => 
+            db.collection('lessons').updateOne(
                 { _id: item.lessonId },
                 { $inc: { spaces: -item.quantity } }
-            );
-        }
+            )
+        );
+        
+        await Promise.all(updatePromises);
         
         res.status(201).json({ 
-            ...newOrder, 
-            _id: result.insertedId,
-            message: 'Order created successfully' 
+            orderId: result.insertedId,
+            message: 'Order created successfully',
+            total: newOrder.total
         });
     } catch (error) {
         console.error('Error creating order:', error);
@@ -64,11 +74,14 @@ router.post('/', async (req, res) => {
     }
 });
 
-// GET /api/orders - Get all orders (for testing)
+// GET /api/orders - Get all orders
 router.get('/', async (req, res) => {
     try {
         const db = getDatabase();
-        const orders = await db.collection('orders').find({}).toArray();
+        const orders = await db.collection('orders')
+            .find({})
+            .sort({ orderDate: -1 })
+            .toArray();
         res.json(orders);
     } catch (error) {
         console.error('Error fetching orders:', error);

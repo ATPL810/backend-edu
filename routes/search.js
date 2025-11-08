@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { getDatabase } = require('../config/database');
 
-// GET /api/search - Full-text search
+// GET /api/search - Full-text search WITH IMAGE PATHS
 router.get('/', async (req, res) => {
     try {
         const db = getDatabase();
@@ -12,25 +12,32 @@ router.get('/', async (req, res) => {
             return res.json([]);
         }
         
-        // Create search pattern for case-insensitive search
-        const searchPattern = new RegExp(searchQuery, 'i');
+        const cleanQuery = searchQuery.trim();
         
-        // Search across multiple fields
         const results = await db.collection('lessons').find({
             $or: [
-                { subject: { $regex: searchPattern } },
-                { location: { $regex: searchPattern } },
-                { description: { $regex: searchPattern } },
-                { price: { $regex: searchPattern } },
-                { spaces: { $regex: searchPattern } }
+                { subject: { $regex: cleanQuery, $options: 'i' } },
+                { location: { $regex: cleanQuery, $options: 'i' } },
+                { description: { $regex: cleanQuery, $options: 'i' } }
             ]
         }).toArray();
         
-        res.json(results);
+        // Add full image URL to search results
+        const resultsWithImagePaths = results.map(lesson => ({
+            ...lesson,
+            imageUrl: `${getBaseUrl(req)}/images/${lesson.image}`
+        }));
+        
+        res.json(resultsWithImagePaths);
     } catch (error) {
         console.error('Search error:', error);
         res.status(500).json({ error: 'Search failed' });
     }
 });
+
+// Helper function to get base URL
+function getBaseUrl(req) {
+    return `${req.protocol}://${req.get('host')}`;
+}
 
 module.exports = router;
