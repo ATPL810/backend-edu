@@ -76,6 +76,57 @@ router.post('/', async (req, res) => {
     }
 });
 
+// Delete an order and restores lessons spaces
+router.delete('/:id', async (req, res) => {
+    try {
+        const db = getDatabase();
+        const orderId = req.params.id;
+
+        // Validate order ID
+        if (!ObjectId.isValid(orderId)) {
+            return res.status(400).json({ error: 'Invalid order ID format' });
+        }
+
+        // Find the order first to get lesson information for restoring spaces
+        const order = await db.collection('orders').findOne({ 
+            _id: new ObjectId(orderId) 
+        });
+
+        if (!order) {
+            return res.status(404).json({ error: 'Order not found' });
+        }
+
+        // Restore lesson spaces before deleting the order
+        const restorePromises = order.lessons.map(item => 
+            db.collection('lessons').updateOne(
+                { _id: item.lessonId },
+                { $inc: { spaces: item.quantity } }
+            )
+        );
+
+        await Promise.all(restorePromises);
+
+        // Delete the order
+        const result = await db.collection('orders').deleteOne({ 
+            _id: new ObjectId(orderId) 
+        });
+
+        if (result.deletedCount === 0) {
+            return res.status(404).json({ error: 'Order not found' });
+        }
+
+        res.status(200).json({ 
+            message: 'Order deleted successfully',
+            deletedOrderId: orderId,
+            restoredLessons: order.lessons.length
+        });
+
+    } catch (error) {
+        console.error('Error deleting order:', error);
+        res.status(500).json({ error: 'Failed to delete order' });
+    }
+});
+
 // GET /api/orders - Get all orders
 router.get('/', async (req, res) => {
     try {

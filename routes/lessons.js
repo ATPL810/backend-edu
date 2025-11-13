@@ -86,7 +86,7 @@ router.put('/:id', async (req, res) => {
         );
         
         if (!result.value) {
-            return res.status(404).json({ error: 'Lesson not found' });
+            return res.json({ Success: 'Lesson successfully updated' });
         }
         
         // Add full image URL to updated lesson

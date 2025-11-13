@@ -10,10 +10,10 @@ const connectToDatabase = async () => {
         client = new MongoClient(MONGODB_URI);
         await client.connect();
         db = client.db("Booking_courses");
-        console.log(' Connected to MongoDB Atlas');
+        console.log('Successfully connected to MongoDB');
         return db;
     } catch (error) {
-        console.error(' MongoDB connection error:', error);
+        console.error('MongoDB connection error:', error);
         throw error;
     }
 };
