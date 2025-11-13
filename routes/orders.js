@@ -62,6 +62,8 @@ router.post('/', async (req, res) => {
         );
         
         await Promise.all(updatePromises);
+
+        console.log("the new order  "+newOrder);
         
         res.status(201).json({ 
             orderId: result.insertedId,

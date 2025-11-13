@@ -5,11 +5,11 @@ let client;
 
 const connectToDatabase = async () => {
     try {
-        const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://username:password@cluster.mongodb.net/musiclessons?retryWrites=true&w=majority';
+        const MONGODB_URI = process.env.MONGODB_URI 
         
         client = new MongoClient(MONGODB_URI);
         await client.connect();
-        db = client.db('musiclessons');
+        db = client.db("Booking_courses");
         console.log(' Connected to MongoDB Atlas');
         return db;
     } catch (error) {

@@ -1,0 +1,110 @@
+[{
+  "_id": {
+    "$oid": "691353e256fca33b117764d6"
+  },
+  "subject": "Mathematics",
+  "location": "London",
+  "price": 60,
+  "spaces": 5,
+  "image": "maths.jpg",
+  "description": "Advanced mathematics tutoring"
+},
+{
+  "_id": {
+    "$oid": "691353e256fca33b117764d7"
+  },
+  "subject": "English Literature",
+  "location": "Manchester",
+  "price": 55,
+  "spaces": 5,
+  "image": "english.jpg",
+  "description": "Comprehensive study English literature"
+},
+{
+  "_id": {
+    "$oid": "691353e256fca33b117764d8"
+  },
+  "subject": "History",
+  "location": "Birmingham",
+  "price": 50,
+  "spaces": 5,
+  "image": "history.jpg",
+  "description": "Explore world history"
+},
+{
+  "_id": {
+    "$oid": "691353e256fca33b117764d9"
+  },
+  "subject": "Science",
+  "location": "Liverpool",
+  "price": 65,
+  "spaces": 5,
+  "image": "science.jpg",
+  "description": "Overall sciences"
+},
+{
+  "_id": {
+    "$oid": "691353e256fca33b117764da"
+  },
+  "subject": "Computer Programming",
+  "location": "Leeds",
+  "price": 70,
+  "spaces": 5,
+  "image": "programming.jpg",
+  "description": "CS & Programming fundamentals"
+},
+{
+  "_id": {
+    "$oid": "691353e256fca33b117764db"
+  },
+  "subject": "Art & Design",
+  "location": "Bristol",
+  "price": 45,
+  "spaces": 5,
+  "image": "art.jpg",
+  "description": "Creative/Intuitive Arts"
+},
+{
+  "_id": {
+    "$oid": "691353e256fca33b117764dc"
+  },
+  "subject": "Music Theory",
+  "location": "Glasgow",
+  "price": 40,
+  "spaces": 5,
+  "image": "music.jpg",
+  "description": "Comprehensive music education including instrumental and vocal training"
+},
+{
+  "_id": {
+    "$oid": "691353e256fca33b117764dd"
+  },
+  "subject": "Physics",
+  "location": "Edinburgh",
+  "price": 60,
+  "spaces": 5,
+  "image": "physics.jpg",
+  "description": "Fundamental & practical Physics"
+},
+{
+  "_id": {
+    "$oid": "691353e256fca33b117764de"
+  },
+  "subject": "Chemistry",
+  "location": "Cardiff",
+  "price": 55,
+  "spaces": 5,
+  "image": "chemistry.jpg",
+  "description": "Organic and inorganic Chemistry"
+},
+{
+  "_id": {
+    "$oid": "691353e256fca33b117764df"
+  },
+  "subject": "Biology",
+  "location": "Belfast",
+  "price": 50,
+  "spaces": 5,
+  "image": "biology.jpg",
+  "description": "Human biology and Eco-Systems"
+}]

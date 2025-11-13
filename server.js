@@ -1,3 +1,6 @@
+// Loading the environment variables first
+require('dotenv').config();
+
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
@@ -56,12 +59,21 @@ app.get('/health', (req, res) => {
 });
 
 // 404 handler
-app.use('*', (req, res) => {
+//  CORRECT - Use a proper 404 handler
+app.use((req, res) => {
     res.status(404).json({ 
         error: 'Route not found',
-        requestedUrl: req.originalUrl 
+        message: `The route ${req.method} ${req.originalUrl} does not exist`,
+        availableEndpoints: [
+            'GET /api/lessons',
+            'POST /api/orders', 
+            'GET /api/search?q=query',
+            'PUT /api/lessons/:id',
+            'GET /health'
+        ]
     });
 });
+
 
 // Error handler
 app.use((err, req, res, next) => {
@@ -81,7 +93,7 @@ const startServer = async () => {
         // Start server
         app.listen(PORT, () => {
             console.log(`Server running on port ${PORT}`);
-            console.log(`API available at http://localhost:${PORT}/api`);
+            console.log(`API available at http://localhost:${PORT}/api/lessons`);
             console.log(`Images available at http://localhost:${PORT}/images`);
             console.log(`Health check at http://localhost:${PORT}/health`);
         });
