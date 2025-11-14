@@ -43,7 +43,8 @@ router.post('/', async (req, res) => {
                 lessonId: new ObjectId(lesson.lessonId),
                 subject: lesson.subject,
                 price: lesson.price,
-                image: lesson.image, // Store image for cart display
+                // Store image for cart display
+                image: lesson.image, 
                 quantity: lesson.quantity || 1
             })),
             total: req.body.total || lessons.reduce((sum, lesson) => sum + (lesson.price * (lesson.quantity || 1)), 0),

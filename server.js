@@ -80,7 +80,7 @@ app.use((err, req, res, next) => {
     console.error('Server Error:', err.stack);
     res.status(500).json({ 
         error: 'Something went wrong!',
-        message: process.env.NODE_ENV === 'development' ? err.message : 'Internal server error'
+        message : 'Internal server error'
     });
 });
 
