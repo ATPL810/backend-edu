@@ -20,9 +20,9 @@ router.post('/', async (req, res) => {
             return res.status(400).json({ error: 'Name must contain only letters and spaces' });
         }
         
-        const phoneRegex = /^\d{10,}$/;
+        const phoneRegex = /^\d{7,8}$/;
         if (!phoneRegex.test(phone.trim())) {
-            return res.status(400).json({ error: 'Phone must contain only numbers (min 10 digits)' });
+            alert("Phone must contain 7-8 numbers (min 7 digits)");
         }
         
         if (lessons.length === 0) {
