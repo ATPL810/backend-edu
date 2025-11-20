@@ -15,15 +15,21 @@ router.get('/', async (req, res) => {
         const cleanQuery = searchQuery.trim();
         
         //Searching subject, location, description, price, spaces(availability)
-        const results = await db.collection('lessons').find({
-            $or: [
-                { subject: { $regex: cleanQuery, $options: 'i' } },
-                { location: { $regex: cleanQuery, $options: 'i' } },
-                { description: { $regex: cleanQuery, $options: 'i' } },
-                { price: { $regex: cleanQuery, $options: 'i' } },
-                { spaces: { $regex: cleanQuery, $options: 'i' } }
-            ]
-        }).toArray();
+        //The aggregation is used to convert price and spaces to string for regex matching
+        const results = await db.collection('lessons').aggregate([
+            {
+                $match:{
+                    $or: [
+                        { subject: { $regex: cleanQuery, $options: 'i' } },
+                        { location: { $regex: cleanQuery, $options: 'i' } },
+                        { description: { $regex: cleanQuery, $options: 'i' } },
+                        { $expr: { $regexMatch: { input: { $toString: "$price" }, regex: cleanQuery, options: "i" } } },
+                        { $expr: { $regexMatch: { input: { $toString: "$spaces" }, regex: cleanQuery, options: "i" } } }
+                    ]
+                
+                }
+            }
+        ]).toArray();
         
         // Add full image URL to search results
         const resultsWithImagePaths = results.map(lesson => ({
