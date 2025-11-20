@@ -4,9 +4,10 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+//Connects to the database
 const { connectToDatabase } = require('./config/database');
 
-// Import middleware
+// Import middleware logger and static file handler
 const logger = require('./middleware/logger');
 const staticFileMiddleware = require('./middleware/staticFiles');
 
@@ -23,10 +24,10 @@ app.use(cors());
 app.use(express.json());
 app.use(logger);
 
-// Serve static files from images directory
+// Serves static files from images directory
 app.use('/images', express.static(path.join(__dirname, 'images')));
 
-// Use custom static file middleware for additional functionality
+// Uses custom static file middleware for additional functionality
 app.use(staticFileMiddleware);
 
 // Routes
