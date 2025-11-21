@@ -82,12 +82,12 @@ router.put('/:id', async (req, res) => {
         const result = await db.collection('lessons').findOneAndUpdate(
             { _id: new ObjectId(req.params.id) },
             { $set: updateFields },
-            { returnDocument: 'after' }
+            { returnDocument: false }
         );
         
-        // if (result.value) {
-        //     return res.json({ result, Success: 'Lesson successfully updated' });
-        // }
+        if (!result.value) {
+            return res.status(404).json({ error: 'Lesson not found' });
+        }
         
         // Add full image URL to updated lesson
         const updatedLessonWithImagePath = {
