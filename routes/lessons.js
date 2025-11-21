@@ -57,11 +57,11 @@ router.put('/:id', async (req, res) => {
         if (!ObjectId.isValid(req.params.id)) {
             return res.status(400).json({ error: 'Invalid lesson ID format' });
         }
-
+        //Here 6 fields can be modified
         const db = getDatabase();
         const allowedUpdates = ['subject', 'location', 'price', 'spaces', 'image', 'description'];
         const updates = Object.keys(req.body);
-        
+        //Error check if any field is not allowed
         const isValidOperation = updates.every(update => allowedUpdates.includes(update));
         if (!isValidOperation) {
             return res.status(400).json({ 
@@ -69,25 +69,25 @@ router.put('/:id', async (req, res) => {
                 allowedFields: allowedUpdates 
             });
         }
-        
+        //If no fields to update
         if (updates.length === 0) {
             return res.status(400).json({ error: 'No fields to update' });
         }
-        
+        // Form requests each field to update
         const updateFields = {};
         updates.forEach(field => {
             updateFields[field] = req.body[field];
         });
-        
+        // The update operation is being done here if all criteria are met
         const result = await db.collection('lessons').findOneAndUpdate(
             { _id: new ObjectId(req.params.id) },
             { $set: updateFields },
             { returnDocument: 'after' }
         );
         
-        if (!result.value) {
-            return res.json({ Success: 'Lesson successfully updated' });
-        }
+        // if (result.value) {
+        //     return res.json({ result, Success: 'Lesson successfully updated' });
+        // }
         
         // Add full image URL to updated lesson
         const updatedLessonWithImagePath = {
@@ -95,7 +95,11 @@ router.put('/:id', async (req, res) => {
             imageUrl: `${getBaseUrl(req)}/images/${result.value.image}`
         };
         
-        res.json(updatedLessonWithImagePath);
+        res.json({
+            success: true,
+            message: 'Lesson successfully updated',
+            data: updatedLessonWithImagePath
+        });
     } catch (error) {
         console.error('Error updating lesson:', error);
         res.status(400).json({ error: 'Failed to update lesson' });
