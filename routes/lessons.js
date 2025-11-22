@@ -108,13 +108,14 @@ router.get('/:id', async (req, res) => {
 
 
 
-
+// PUT /api/lessons/:id - Update lesson
 router.put('/:id', async (req, res) => {
     try {
         if (!ObjectId.isValid(req.params.id)) {
             return res.status(400).json({ error: 'Invalid lesson ID format' });
         }
 
+        //Here 6 fields can be modified
         const db = getDatabase();
         const allowedUpdates = ['subject', 'location', 'price', 'spaces', 'image', 'description'];
         const updates = Object.keys(req.body);
@@ -131,6 +132,7 @@ router.put('/:id', async (req, res) => {
             return res.status(400).json({ error: 'No fields to update' });
         }
         
+        // Goes through each field to update
         const updateFields = {};
         updates.forEach(field => {
             updateFields[field] = req.body[field];
@@ -161,7 +163,7 @@ router.put('/:id', async (req, res) => {
             ...updatedLesson,
             imageUrl: `${getBaseUrl(req)}/images/${updatedLesson.image}`
         };
-        
+        //Displays the success message along with updated data
         res.json({
             success: true,
             message: 'Lesson successfully updated',

@@ -1,3 +1,4 @@
+//for any request, response and next it will show the log in the logger screen or console
 const logger = (req, res, next) => {
     const timestamp = new Date().toISOString();
     //It logs the HTTP method, URL, IP address, User-Agent, and request body (for GET/DELETE/POST/PUT requests) of each incoming request.  
@@ -5,6 +6,7 @@ const logger = (req, res, next) => {
     const url = req.url;
     const ip = req.ip || req.connection.remoteAddress;
     
+    //if it is a get/post/put/delete request it will log the following information
     console.log(`[${timestamp}] ${method} ${url} - IP: ${ip} - User-Agent: ${req.get('User-Agent')}`);
     
     // Log request body for POST/PUT requests and indents by 2 spaces

@@ -6,19 +6,22 @@ const { getDatabase } = require('../config/database');
 router.get('/', async (req, res) => {
     try {
         const db = getDatabase();
+        //gets the request from the query parameter 'q' in the url
         const searchQuery = req.query.q;
         
         if (!searchQuery || searchQuery.trim() === '') {
             return res.json([]);
         }
-        
+        // Cleans the code if there are any trailing spaces
         const cleanQuery = searchQuery.trim();
         
         //Searching subject, location, description, price, spaces(availability)
         //The aggregation is used to convert price and spaces to string for regex matching
         const results = await db.collection('lessons').aggregate([
             {
+                // It is like a where statement in sql  
                 $match:{
+                    //it will filter the documents according to the field values
                     $or: [
                         { subject: { $regex: cleanQuery, $options: 'i' } },
                         { location: { $regex: cleanQuery, $options: 'i' } },
