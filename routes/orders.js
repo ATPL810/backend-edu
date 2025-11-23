@@ -24,17 +24,17 @@ router.post('/', async (req, res) => {
         if (!phoneRegex.test(phone.trim())) {
             alert("Phone must contain 7-8 numbers (min 7 digits)");
         }
-        
+        //if the lessons array is empty 
         if (lessons.length === 0) {
             return res.status(400).json({ error: 'Lessons array cannot be empty' });
         }
-        
+        // validates each lesson object in the lessons array
         for (const lesson of lessons) {
             if (!lesson.lessonId || !ObjectId.isValid(lesson.lessonId)) {
                 return res.status(400).json({ error: 'Invalid lesson ID in lessons array' });
             }
         }
-        
+        // The new order object to be inserted into the database
         const newOrder = {
             name: name.trim(),
             phone: phone.trim(),
@@ -54,10 +54,10 @@ router.post('/', async (req, res) => {
         
         const result = await db.collection('orders').insertOne(newOrder);
         
-        // Update lesson spaces
+        // Updating lesson spaces
         const updatePromises = newOrder.lessons.map(async (item) => {
             try {
-                // First, get the current lesson to know current spaces
+                // Getting the current lesson to know current spaces
                 const currentLesson = await db.collection('lessons').findOne(
                     { _id: item.lessonId }
                 );
@@ -69,7 +69,7 @@ router.post('/', async (req, res) => {
                 // Calculate new spaces
                 const newSpaces = currentLesson.spaces - item.quantity;
                 
-                // Update via PUT API
+                // Updating via PUT API(fetch)
                 const response = await fetch(`${getBaseUrl(req)}/api/lessons/${item.lessonId}`, {
                     method: 'PUT',
                     headers: {
@@ -128,7 +128,7 @@ router.delete('/:id', async (req, res) => {
         // Restore lesson spaces before deleting the order
         const restorePromises = order.lessons.map(async (item) => {
             try {
-                // First, get the current lesson to know current spaces
+                // Getting the current lesson to know current spaces
                 const currentLesson = await db.collection('lessons').findOne(
                     { _id: item.lessonId }
                 );
@@ -140,7 +140,7 @@ router.delete('/:id', async (req, res) => {
                 // Calculate new spaces (restore by adding back the quantity)
                 const newSpaces = currentLesson.spaces + item.quantity;
                 
-                // Update via PUT API
+                // Updates via PUT API
                 const response = await fetch(`${getBaseUrl(req)}/api/lessons/${item.lessonId}`, {
                     method: 'PUT',
                     headers: {
