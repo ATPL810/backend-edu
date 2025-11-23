@@ -7,6 +7,7 @@ const { getDatabase } = require('../config/database');
 router.get('/', async (req, res) => {
     try {
         const db = getDatabase();
+        //The data retrieved from the database is stored in an array to display all lessons on the frontend
         const lessons = await db.collection('lessons').find({}).toArray();
         
         // Add full image URL to each lesson
@@ -50,63 +51,6 @@ router.get('/:id', async (req, res) => {
         res.status(500).json({ error: 'Failed to fetch lesson' });
     }
 });
-
-// PUT /api/lessons/:id - Update lesson
-// router.put('/:id', async (req, res) => {
-//     try {
-//         if (!ObjectId.isValid(req.params.id)) {
-//             return res.status(400).json({ error: 'Invalid lesson ID format' });
-//         }
-//         //Here 6 fields can be modified
-//         const db = getDatabase();
-//         const allowedUpdates = ['subject', 'location', 'price', 'spaces', 'image', 'description'];
-//         const updates = Object.keys(req.body);
-//         //Error check if any field is not allowed
-//         const isValidOperation = updates.every(update => allowedUpdates.includes(update));
-//         if (!isValidOperation) {
-//             return res.status(400).json({ 
-//                 error: 'Invalid updates',
-//                 allowedFields: allowedUpdates 
-//             });
-//         }
-//         //If no fields to update
-//         if (updates.length === 0) {
-//             return res.status(400).json({ error: 'No fields to update' });
-//         }
-//         // Form requests each field to update
-//         const updateFields = {};
-//         updates.forEach(field => {
-//             updateFields[field] = req.body[field];
-//         });
-//         // The update operation is being done here if all criteria are met
-//         const result = await db.collection('lessons').findOneAndUpdate(
-//             { _id: new ObjectId(req.params.id) },
-//             { $set: updateFields },
-//             { returnDocument: false }
-//         );
-        
-//         if (!result.value) {
-//             return res.status(404).json({ error: 'Lesson not found' });
-//         }
-        
-//         // Add full image URL to updated lesson
-//         const updatedLessonWithImagePath = {
-//             ...result.value,
-//             imageUrl: `${getBaseUrl(req)}/images/${result.value.image}`
-//         };
-        
-//         res.json({
-//             success: true,
-//             message: 'Lesson successfully updated',
-//             data: updatedLessonWithImagePath
-//         });
-//     } catch (error) {
-//         console.error('Error updating lesson:', error);
-//         res.status(400).json({ error: 'Failed to update lesson' });
-//     }
-// });
-
-
 
 // PUT /api/lessons/:id - Update lesson
 router.put('/:id', async (req, res) => {
@@ -173,12 +117,7 @@ router.put('/:id', async (req, res) => {
         console.error('Error updating lesson:', error);
         res.status(400).json({ error: 'Failed to update lesson' });
     }
-});
-
-
-
-
-
+}); 
 
 // POST /api/lessons - Create new lesson
 router.post('/', async (req, res) => {

@@ -43,7 +43,6 @@ app.get('/', (req, res) => {
             lessons: 'GET /api/lessons',
             orders: 'POST /api/orders',
             search: 'GET /api/search?q=query',
-            update_lesson: 'PUT /api/lessons/:id',
             images: 'GET /images/filename.jpg'
         },
         timestamp: new Date().toISOString()
@@ -85,7 +84,7 @@ app.use((err, req, res, next) => {
     });
 });
 
-// Initialize server
+// Initialize server and not reassigning app to startServer function
 const startServer = async () => {
     try {
         // Connect to database first
@@ -104,6 +103,7 @@ const startServer = async () => {
     }
 };
 
+//This calls the startServer function to start the server
 startServer();
 
 module.exports = app;
