@@ -1,5 +1,8 @@
 # Backend of the Course Booking System
 
+Student Name: Aayush Tridevrai Pratapsingh Lochun
+Student Number: M01004726
+
 In order to get the node_modules folder and the dependencies:
 
 - open terminal in the folder's name
