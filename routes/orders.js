@@ -55,12 +55,40 @@ router.post('/', async (req, res) => {
         const result = await db.collection('orders').insertOne(newOrder);
         
         // Update lesson spaces
-        const updatePromises = newOrder.lessons.map(item => 
-            db.collection('lessons').updateOne(
-                { _id: item.lessonId },
-                { $inc: { spaces: -item.quantity } }
-            )
-        );
+        const updatePromises = newOrder.lessons.map(async (item) => {
+            try {
+                // First, get the current lesson to know current spaces
+                const currentLesson = await db.collection('lessons').findOne(
+                    { _id: item.lessonId }
+                );
+                
+                if (!currentLesson) {
+                    throw new Error(`Lesson ${item.lessonId} not found`);
+                }
+                
+                // Calculate new spaces
+                const newSpaces = currentLesson.spaces - item.quantity;
+                
+                // Update via PUT API
+                const response = await fetch(`${getBaseUrl(req)}/api/lessons/${item.lessonId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ spaces: newSpaces })
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || `HTTP ${response.status}`);
+                }
+                
+                return await response.json();
+            } catch (error) {
+                console.error(`Failed to update spaces for lesson ${item.lessonId}:`, error);
+                throw error;
+            }
+        });
         
         await Promise.all(updatePromises);
 
@@ -98,12 +126,40 @@ router.delete('/:id', async (req, res) => {
         }
 
         // Restore lesson spaces before deleting the order
-        const restorePromises = order.lessons.map(item => 
-            db.collection('lessons').updateOne(
-                { _id: item.lessonId },
-                { $inc: { spaces: item.quantity } }
-            )
-        );
+        const restorePromises = order.lessons.map(async (item) => {
+            try {
+                // First, get the current lesson to know current spaces
+                const currentLesson = await db.collection('lessons').findOne(
+                    { _id: item.lessonId }
+                );
+                
+                if (!currentLesson) {
+                    throw new Error(`Lesson ${item.lessonId} not found`);
+                }
+                
+                // Calculate new spaces (restore by adding back the quantity)
+                const newSpaces = currentLesson.spaces + item.quantity;
+                
+                // Update via PUT API
+                const response = await fetch(`${getBaseUrl(req)}/api/lessons/${item.lessonId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ spaces: newSpaces })
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || `HTTP ${response.status}`);
+                }
+                
+                return await response.json();
+            } catch (error) {
+                console.error(`Failed to restore spaces for lesson ${item.lessonId}:`, error);
+                throw error;
+            }
+        });
 
         await Promise.all(restorePromises);
 
@@ -142,5 +198,10 @@ router.get('/', async (req, res) => {
         res.status(500).json({ error: 'Failed to fetch orders' });
     }
 });
+
+// Helper function to get base URL
+function getBaseUrl(req) {
+    return `${req.protocol}://${req.get('host')}`;
+}
 
 module.exports = router;
