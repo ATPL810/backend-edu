@@ -21,6 +21,7 @@ const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(cors());
+//parses incoming JSON requests and puts the parsed data in req.body
 app.use(express.json());
 app.use(logger);
 
@@ -35,7 +36,7 @@ app.use('/api/lessons', lessonRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/search', searchRoutes);
 
-// Root route
+// Root route (Display available endpoints at start)
 app.get('/', (req, res) => {
     res.json({ 
         message: 'Course Booking API is running!',
@@ -59,7 +60,7 @@ app.get('/health', (req, res) => {
 });
 
 // 404 handler
-//  CORRECT - Use a proper 404 handler
+// In case the route is not found, this middleware will handle it
 app.use((req, res) => {
     res.status(404).json({ 
         error: 'Route not found',

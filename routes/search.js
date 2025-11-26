@@ -15,19 +15,24 @@ router.get('/', async (req, res) => {
         // Cleans the code if there are any trailing spaces
         const cleanQuery = searchQuery.trim();
         
-        //Searching subject, location, description, price, spaces(availability)
-        //The aggregation is used to convert price and spaces to string for regex matching
+        //The aggregation is used for unified search across multiple fields and eases conversion of data types
+        //multi-field search with regex for case-insensitive matching
         const results = await db.collection('lessons').aggregate([
             {
-                // It is like a where statement in sql  
+                // It is like a WHERE statement in sql that can be used in aggregation 
                 $match:{
                     //it will filter the documents according to the field values
                     $or: [
+                        //options 'i' makes the search case-insensitive. 
+                        //it finds partial matches in the fields. e.g., "mat" will match "Mathematics","maths"
                         { subject: { $regex: cleanQuery, $options: 'i' } },
                         { location: { $regex: cleanQuery, $options: 'i' } },
                         { description: { $regex: cleanQuery, $options: 'i' } },
                         { $expr: { $regexMatch: { input: { $toString: "$price" }, regex: cleanQuery, options: "i" } } },
                         { $expr: { $regexMatch: { input: { $toString: "$spaces" }, regex: cleanQuery, options: "i" } } }
+                        //expr for complex expressions
+                        //regexMatch performs regex search which can be any expression
+                        //regex used for only variables and used for search where it looks for patterns
                     ]
                 
                 }
@@ -47,7 +52,7 @@ router.get('/', async (req, res) => {
     }
 });
 
-// Helper function to get base URL
+// Helper function to get base URL which is dynamic( not hardcoded)
 function getBaseUrl(req) {
     return `${req.protocol}://${req.get('host')}`;
 }

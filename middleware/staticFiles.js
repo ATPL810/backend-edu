@@ -7,6 +7,7 @@ const staticFileMiddleware = (req, res, next) => {
         const imagePath = path.join(__dirname, '../images', path.basename(req.url));
         
         // .access checks if file exists in the disk and .constants if file exists
+        //.constants.F_OK checks for existence of file
         fs.access(imagePath, fs.constants.F_OK, (err) => {
             if (err) {
                 // If ile doesn't exist, it returns default image or error

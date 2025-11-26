@@ -7,6 +7,7 @@ const { getDatabase } = require('../config/database');
 router.post('/', async (req, res) => {
     try {
         const db = getDatabase();
+        //saves the order details from the request body
         const { name, phone, lessons, email } = req.body;
         
         if (!name || !phone || !lessons || !Array.isArray(lessons)) {
@@ -15,11 +16,13 @@ router.post('/', async (req, res) => {
             });
         }
         
+        //regex format validation(A-Za-z(case sensitive) and \s--spaces only) and + for full string match
         const nameRegex = /^[A-Za-z\s]+$/;
         if (!nameRegex.test(name.trim())) {
             return res.status(400).json({ error: 'Name must contain only letters and spaces' });
         }
-        
+
+        // \d{7,8} means 7 to 8 digits only
         const phoneRegex = /^\d{7,8}$/;
         if (!phoneRegex.test(phone.trim())) {
             alert("Phone must contain 7-8 numbers (min 7 digits)");
@@ -52,6 +55,7 @@ router.post('/', async (req, res) => {
             status: 'confirmed'
         };
         
+        // Insert the new order into the orders collection
         const result = await db.collection('orders').insertOne(newOrder);
         
         // Updating lesson spaces
@@ -69,7 +73,7 @@ router.post('/', async (req, res) => {
                 // Calculate new spaces
                 const newSpaces = currentLesson.spaces - item.quantity;
                 
-                // Updating via PUT API(fetch)
+                // Updating via PUT API(fetch) for spaces
                 const response = await fetch(`${getBaseUrl(req)}/api/lessons/${item.lessonId}`, {
                     method: 'PUT',
                     headers: {
@@ -89,11 +93,13 @@ router.post('/', async (req, res) => {
                 throw error;
             }
         });
-        
+
+        // it waits for all the update operations to complete
         await Promise.all(updatePromises);
 
         console.log("the new order  "+newOrder);
         
+        //success response
         res.status(201).json({ 
             orderId: result.insertedId,
             message: 'Order created successfully',
@@ -140,7 +146,7 @@ router.delete('/:id', async (req, res) => {
                 // Calculate new spaces (restore by adding back the quantity)
                 const newSpaces = currentLesson.spaces + item.quantity;
                 
-                // Updates via PUT API
+                // Updates via PUT API for spaces(availability)
                 const response = await fetch(`${getBaseUrl(req)}/api/lessons/${item.lessonId}`, {
                     method: 'PUT',
                     headers: {
@@ -149,11 +155,13 @@ router.delete('/:id', async (req, res) => {
                     body: JSON.stringify({ spaces: newSpaces })
                 });
                 
+                // error handling for fetch response
                 if (!response.ok) {
                     const errorData = await response.json();
                     throw new Error(errorData.error || `HTTP ${response.status}`);
                 }
                 
+                // returns the updated lesson data
                 return await response.json();
             } catch (error) {
                 console.error(`Failed to restore spaces for lesson ${item.lessonId}:`, error);
@@ -161,9 +169,10 @@ router.delete('/:id', async (req, res) => {
             }
         });
 
+        // it waits for all the restore operations to complete
         await Promise.all(restorePromises);
 
-        // Delete the order
+        // Delete the order by ID
         const result = await db.collection('orders').deleteOne({ 
             _id: new ObjectId(orderId) 
         });
@@ -189,7 +198,9 @@ router.get('/', async (req, res) => {
     try {
         const db = getDatabase();
         const orders = await db.collection('orders')
+             // finds all orders
             .find({})
+            // sorts in descending order of orderDate (newest first)
             .sort({ orderDate: -1 })
             .toArray();
         res.json(orders);

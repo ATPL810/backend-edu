@@ -72,17 +72,20 @@ router.put('/:id', async (req, res) => {
             });
         }
         
+        // to check if there are fields to update
         if (updates.length === 0) {
             return res.status(400).json({ error: 'No fields to update' });
         }
         
         // Goes through each field to update
+        // containes only the fields that need to be updated
         const updateFields = {};
         updates.forEach(field => {
             updateFields[field] = req.body[field];
         });
         
-        // FIX: Use updateOne and then fetch the updated document separately
+        // the updateOne method is used to update the document in the database
+        // $set operator is used to specify the fields to be updated
         const updateResult = await db.collection('lessons').updateOne(
             { _id: new ObjectId(req.params.id) },
             { $set: updateFields }
@@ -123,12 +126,14 @@ router.put('/:id', async (req, res) => {
 router.post('/', async (req, res) => {
     try {
         const db = getDatabase();
-        
+
+        // Validation for required fields
         const { subject, location, price } = req.body;
         if (!subject || !location || !price) {
             return res.status(400).json({ error: 'Subject, location, and price are required' });
         }
-        
+
+        // Create new lesson object
         const newLesson = {
             subject: subject.trim(),
             location: location.trim(),
@@ -139,6 +144,7 @@ router.post('/', async (req, res) => {
             createdAt: new Date()
         };
         
+        // Insert new lesson into database
         const result = await db.collection('lessons').insertOne(newLesson);
         
         // Add full image URL to new lesson
